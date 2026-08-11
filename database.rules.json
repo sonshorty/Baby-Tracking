@@ -1,0 +1,16 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "records": {
+      ".read": "auth != null && auth.provider != 'anonymous'",
+      ".write": "auth != null && auth.provider != 'anonymous'"
+    },
+    "demo": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && auth.provider === 'anonymous'",
+        ".write": "auth != null && auth.uid === $uid && auth.provider === 'anonymous'"
+      }
+    }
+  }
+}
