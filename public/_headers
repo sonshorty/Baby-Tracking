@@ -1,0 +1,19 @@
+# index.html và sw.js không được cache – luôn lấy bản mới nhất
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/registerSW.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/manifest.webmanifest
+  Cache-Control: no-cache, must-revalidate
+
+/workbox-*.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# assets có hash trong tên file – cache vĩnh viễn
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

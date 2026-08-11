@@ -1,0 +1,133 @@
+.record-form {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Who tabs */
+.who-tabs {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+  padding: 4px;
+  gap: 4px;
+}
+
+.who-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-500);
+  transition: all 0.15s;
+}
+
+.who-tab span:first-child { font-size: 20px; }
+
+.who-tab.active {
+  background: white;
+  color: var(--pink-600);
+  box-shadow: var(--shadow);
+}
+
+/* Type pills */
+.type-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.type-pill {
+  flex: 1;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--gray-200);
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-600);
+  transition: all 0.15s;
+}
+
+.type-pill span:first-child { font-size: 18px; }
+
+.type-pill.active {
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* Form card */
+.form-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px 20px 16px;
+  box-shadow: var(--shadow);
+}
+
+/* Diaper */
+.diaper-section {
+  text-align: center;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.diaper-icon { font-size: 64px; line-height: 1; }
+.diaper-hint { color: var(--gray-500); font-size: 15px; }
+
+/* Save button */
+.save-btn {
+  background: linear-gradient(135deg, #f9a8d4, #ec4899);
+  color: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  width: 100%;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(236,72,153,0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.save-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(236,72,153,0.3);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17,24,39,0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 100;
+  white-space: nowrap;
+  animation: fadeInOut 1.8s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}

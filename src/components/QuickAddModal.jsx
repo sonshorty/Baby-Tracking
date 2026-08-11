@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { addRecord, TYPES } from '../store/useStore';
+import SliderInput from './SliderInput';
+import './QuickAddModal.css';
+
+const WHO_TABS = [
+  { id: 'mom',  label: 'Mẹ', emoji: '👩', types: ['mom_water', 'mom_milk'] },
+  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', 'baby_diaper'] },
+];
+
+const DEFAULTS = {
+  mom_water: 200, mom_milk: 150,
+  baby_breast: 100, baby_bottle: 100, baby_diaper: 0,
+};
+
+const pad = n => String(n).padStart(2, '0');
+
+export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
+  const [who, setWho]   = useState('baby');
+  const [type, setType] = useState('baby_breast');
+  const [ml, setMl]     = useState(100);
+  const [hour, setHour] = useState(initHour);
+  const [min, setMin]   = useState(initMinute);
+
+  function switchWho(w) {
+    setWho(w);
+    const t = WHO_TABS.find(x => x.id === w).types[0];
+    setType(t);
+    setMl(DEFAULTS[t]);
+  }
+
+  function switchType(t) {
+    setType(t);
+    setMl(DEFAULTS[t]);
+  }
+
+  function changeHour(delta) {
+    setHour(h => (h + delta + 24) % 24);
+  }
+  function changeMin(delta) {
+    setMin(m => (m + delta + 60) % 60);
+  }
+
+  function save() {
+    const ts = new Date(date);
+    ts.setHours(hour, min, 0, 0);
+    addRecord({ type, value: type === 'baby_diaper' ? null : ml, timestamp: ts.toISOString() });
+    onClose();
+  }
+
+  const typeList = WHO_TABS.find(x => x.id === who).types;
+  const isDiaper = type === 'baby_diaper';
+
+  return (
+    <div className="qam-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="qam-sheet">
+        <div className="qam-handle" />
+
+        <div className="qam-header">
+          <span className="qam-title">Thêm ghi chú</span>
+          <button className="qam-close" onClick={onClose} aria-label="Đóng">×</button>
+        </div>
+
+        {/* Who tabs */}
+        <div className="qam-who-tabs">
+          {WHO_TABS.map(w => (
+            <button key={w.id} className={`qam-who-tab${who === w.id ? ' active' : ''}`} onClick={() => switchWho(w.id)}>
+              <span>{w.emoji}</span><span>{w.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Type pills */}
+        <div className="qam-type-pills">
+          {typeList.map(t => {
+            const info = TYPES[t];
+            return (
+              <button
+                key={t}
+                className={`qam-type-pill${type === t ? ' active' : ''}`}
+                style={type === t ? { background: info.color, borderColor: info.color } : {}}
+                onClick={() => switchType(t)}
+              >
+                <span>{info.emoji}</span>
+                <span>{info.label.replace(/ \(mẹ\)/, '')}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Slider */}
+        {!isDiaper && (
+          <div className="qam-slider">
+            <SliderInput type={type} value={ml} onChange={setMl} />
+          </div>
+        )}
+        {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
+
+        {/* Inline time picker */}
+        <div className="qam-time-row">
+          <span className="qam-time-label">⏰ Thời gian:</span>
+          <div className="qam-time-spin">
+            <button className="qam-spin-btn" onClick={() => changeHour(1)}>▲</button>
+            <span className="qam-spin-val">{pad(hour)}</span>
+            <button className="qam-spin-btn" onClick={() => changeHour(-1)}>▼</button>
+          </div>
+          <span className="qam-colon">:</span>
+          <div className="qam-time-spin">
+            <button className="qam-spin-btn" onClick={() => changeMin(1)}>▲</button>
+            <span className="qam-spin-val">{pad(min)}</span>
+            <button className="qam-spin-btn" onClick={() => changeMin(-1)}>▼</button>
+          </div>
+        </div>
+
+        <button className="qam-save-btn" onClick={save}>Lưu lại</button>
+      </div>
+    </div>
+  );
+}
