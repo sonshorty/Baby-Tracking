@@ -3,13 +3,13 @@
     ".read": false,
     ".write": false,
     "records": {
-      ".read": "auth != null && auth.provider != 'anonymous'",
-      ".write": "auth != null && auth.provider != 'anonymous'"
+      ".read": "auth != null && auth.token.firebase.sign_in_provider != 'anonymous'",
+      ".write": "auth != null && auth.token.firebase.sign_in_provider != 'anonymous'"
     },
     "demo": {
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid && auth.provider === 'anonymous'",
-        ".write": "auth != null && auth.uid === $uid && auth.provider === 'anonymous'"
+        ".read": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider == 'anonymous'",
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider == 'anonymous'"
       }
     }
   }
