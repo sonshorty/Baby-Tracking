@@ -25,6 +25,13 @@ environment before creating a deployable release:
 
 ## Publish a GitHub release
 
+After a change reaches `main`, GitHub Actions automatically deploys the app at:
+
+**https://sonshorty.github.io/Baby-Tracking/**
+
+Open that address in Chrome. On Android, use **Add to Home screen** from the
+Chrome menu to install the PWA.
+
 Add the Firebase settings above as repository Actions secrets. Then update the
 version in `package.json` and `package-lock.json`, merge the change, and push a
 matching tag:
@@ -34,7 +41,14 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow builds the app from the lockfile, retains the package as a
-workflow artifact, and attaches both the archive and checksum to a GitHub
-release. It can also be run manually to produce an artifact without publishing
-a GitHub release.
+Every push to `main` builds and deploys the app. A version tag additionally
+retains the package as a workflow artifact and publishes the archive and
+checksum as a GitHub release. The deployment URL is also shown on the workflow
+summary. Enable **GitHub Actions** as the Pages source in the repository settings
+once before the first deployment.
+
+The workflow sets `VITE_BASE_PATH` to the repository name so that application
+assets, the web app manifest, and the service worker work at a project Pages URL
+`https://sonshorty.github.io/Baby-Tracking/`. It can also be run manually to
+deploy the current branch and produce an artifact without publishing a GitHub
+release.
