@@ -1,70 +1,110 @@
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { ref, push, remove, onValue, serverTimestamp } from 'firebase/database';
+import { auth, db } from '../firebase';
+import { ref, push, remove, onValue } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
 
-const STORAGE_KEY = 'baby-tracker-v1';
-const MIGRATED_KEY = 'baby-tracker-migrated';
-const DB_PATH = 'records';
+const FAMILY_STORAGE_KEY = 'baby-tracker-v1';
+const FAMILY_MIGRATED_KEY = 'baby-tracker-migrated';
+const DEMO_STORAGE_KEY = 'baby-tracker-demo-v1';
 
-function loadCache() {
+function pathFor(user) {
+  return user?.isAnonymous ? `demo/${user.uid}/records` : 'records';
+}
+
+function storageKeyFor(user) {
+  return user?.isAnonymous ? DEMO_STORAGE_KEY : FAMILY_STORAGE_KEY;
+}
+
+function loadCache(key = FAMILY_STORAGE_KEY) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
-function persist(records) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch {}
+function persist(key, records) {
+  try { localStorage.setItem(key, JSON.stringify(records)); } catch {}
 }
 
-let _records = loadCache();
+let _records = [];
 let _listeners = new Set();
-// 'connecting' | 'ok' | 'error'
 let _syncStatus = 'connecting';
 let _statusListeners = new Set();
+let _activeUser = null;
+let _activePath = null;
+let _unsubscribeDb = null;
 
 function broadcast() { _listeners.forEach(fn => fn([..._records])); }
 function broadcastStatus() { _statusListeners.forEach(fn => fn(_syncStatus)); }
 
-const dbRef = ref(db, DB_PATH);
-onValue(dbRef, snapshot => {
-  const data = snapshot.val();
-  const firebaseRecords = data
-    ? Object.entries(data)
-        .map(([id, val]) => ({ id, ...val }))
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    : [];
+function setStatus(status) {
+  _syncStatus = status;
+  broadcastStatus();
+}
 
-  // One-time migration: push existing localStorage records to Firebase if DB is empty
-  const alreadyMigrated = localStorage.getItem(MIGRATED_KEY);
-  if (!data && !alreadyMigrated && _records.length > 0) {
-    _records.forEach(r => {
-      const { id, ...rest } = r;
-      push(dbRef, rest);
-    });
-    localStorage.setItem(MIGRATED_KEY, '1');
-    // wait for the next onValue callback which will include migrated data
+function connectForUser(user) {
+  if (_unsubscribeDb) {
+    _unsubscribeDb();
+    _unsubscribeDb = null;
+  }
+
+  _activeUser = user;
+  _activePath = user ? pathFor(user) : null;
+  _records = user ? loadCache(storageKeyFor(user)) : [];
+  broadcast();
+
+  if (!user) {
+    setStatus('connecting');
     return;
   }
-  localStorage.setItem(MIGRATED_KEY, '1');
 
-  _records = firebaseRecords;
-  persist(_records);
-  _syncStatus = 'ok';
-  broadcast();
-  broadcastStatus();
-}, error => {
-  console.error('[Firebase]', error.code, error.message);
-  _syncStatus = 'error';
-  broadcastStatus();
-});
+  setStatus('connecting');
+  const dbRef = ref(db, _activePath);
+  _unsubscribeDb = onValue(dbRef, snapshot => {
+    const data = snapshot.val();
+    const firebaseRecords = data
+      ? Object.entries(data)
+          .map(([id, val]) => ({ id, ...val }))
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      : [];
+
+    // Preserve the existing one-time localStorage migration for family accounts only.
+    if (!user.isAnonymous) {
+      const alreadyMigrated = localStorage.getItem(FAMILY_MIGRATED_KEY);
+      if (!data && !alreadyMigrated && _records.length > 0) {
+        _records.forEach(r => {
+          const { id, ...rest } = r;
+          push(dbRef, rest);
+        });
+        localStorage.setItem(FAMILY_MIGRATED_KEY, '1');
+        return;
+      }
+      localStorage.setItem(FAMILY_MIGRATED_KEY, '1');
+    }
+
+    _records = firebaseRecords;
+    persist(storageKeyFor(user), _records);
+    setStatus('ok');
+    broadcast();
+  }, error => {
+    console.error('[Firebase]', error.code, error.message);
+    setStatus('error');
+  });
+}
+
+onAuthStateChanged(auth, connectForUser);
+
+function requireActivePath() {
+  if (!_activeUser || !_activePath) throw new Error('Authentication required');
+  return _activePath;
+}
 
 export function addRecord({ type, value, note = '', timestamp = new Date().toISOString() }) {
-  push(dbRef, { type, value: value ?? null, note, timestamp });
+  push(ref(db, requireActivePath()), { type, value: value ?? null, note, timestamp });
 }
 
 export function deleteRecord(id) {
-  remove(ref(db, `${DB_PATH}/${id}`));
+  remove(ref(db, `${requireActivePath()}/${id}`));
 }
 
 export function exportData() {
@@ -83,6 +123,7 @@ export function importData(jsonText) {
   const incoming = Array.isArray(parsed) ? parsed : parsed.records ?? [];
   if (!Array.isArray(incoming)) throw new Error('Invalid format');
   const existingTs = new Set(_records.map(r => r.timestamp + r.type));
+  const dbRef = ref(db, requireActivePath());
   let imported = 0;
   incoming.forEach(r => {
     if (!r.type || !r.timestamp) return;
@@ -97,16 +138,18 @@ export function useRecords() {
   const [records, setRecords] = useState(_records);
   useEffect(() => {
     _listeners.add(setRecords);
+    setRecords([..._records]);
     return () => _listeners.delete(setRecords);
   }, []);
   return records;
 }
 
 export function useSyncStatus() {
-  const [status, setStatus] = useState(_syncStatus);
+  const [status, setStatusState] = useState(_syncStatus);
   useEffect(() => {
-    _statusListeners.add(setStatus);
-    return () => _statusListeners.delete(setStatus);
+    _statusListeners.add(setStatusState);
+    setStatusState(_syncStatus);
+    return () => _statusListeners.delete(setStatusState);
   }, []);
   return status;
 }
