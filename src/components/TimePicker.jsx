@@ -1,29 +1,38 @@
+import ScrollPicker from './ScrollPicker';
 import './TimePicker.css';
 
-const pad = n => String(n).padStart(2, '0');
-
-function SpinColumn({ value, min, max, onChange, label }) {
-  const dec = () => onChange(value <= min ? max : value - 1);
-  const inc = () => onChange(value >= max ? min : value + 1);
-
-  return (
-    <div className="spin-col">
-      <button className="spin-btn" onClick={inc} aria-label={`Tăng ${label}`}>▲</button>
-      <span className="spin-value">{pad(value)}</span>
-      <button className="spin-btn" onClick={dec} aria-label={`Giảm ${label}`}>▼</button>
-    </div>
-  );
-}
+const HOURS = Array.from({ length: 24 }, (_, index) => index);
+const MINUTES = Array.from({ length: 60 }, (_, index) => index);
+const pad = number => String(number).padStart(2, '0');
 
 export default function TimePicker({ hour, minute, onHourChange, onMinuteChange }) {
   return (
-    <div className="time-picker">
-      <p className="time-picker-label">⏰ Thời gian</p>
-      <div className="time-picker-body">
-        <SpinColumn value={hour}   min={0} max={23} onChange={onHourChange}   label="giờ" />
-        <span className="time-picker-sep">:</span>
-        <SpinColumn value={minute} min={0} max={59} onChange={onMinuteChange} label="phút" />
+    <section className="time-picker" aria-labelledby="time-picker-title">
+      <h2 className="time-picker-label" id="time-picker-title">Thời gian</h2>
+
+      <div className="time-picker-headings" aria-hidden="true">
+        <span>Giờ</span>
+        <span>Phút</span>
       </div>
-    </div>
+
+      <div className="time-picker-body">
+        <div className="time-picker-selection" aria-hidden="true" />
+        <ScrollPicker
+          items={HOURS}
+          value={hour}
+          onChange={onHourChange}
+          formatLabel={pad}
+          label="Giờ"
+        />
+        <span className="time-picker-sep" aria-hidden="true">:</span>
+        <ScrollPicker
+          items={MINUTES}
+          value={minute}
+          onChange={onMinuteChange}
+          formatLabel={pad}
+          label="Phút"
+        />
+      </div>
+    </section>
   );
 }
