@@ -4,7 +4,7 @@ import './ScrollPicker.css';
 const ITEM_H = 44;
 const PAD = 2; // ghost items above/below so first/last items can center
 
-export default function ScrollPicker({ items, value, onChange, formatLabel }) {
+export default function ScrollPicker({ items, value, onChange, formatLabel, label = 'Giá trị' }) {
   const listRef = useRef(null);
   const isProgrammatic = useRef(false);
   const debounce = useRef(null);
@@ -34,14 +34,25 @@ export default function ScrollPicker({ items, value, onChange, formatLabel }) {
 
   return (
     <div className="sp-wrap">
-      {/* selection highlight band */}
-      <div className="sp-highlight" />
       <div className="sp-fade-top" />
       <div className="sp-fade-bottom" />
-      <div className="sp-list" ref={listRef} onScroll={handleScroll}>
+      <div
+        className="sp-list"
+        ref={listRef}
+        onScroll={handleScroll}
+        role="listbox"
+        aria-label={label}
+        aria-valuetext={formatLabel ? formatLabel(value) : String(value)}
+      >
         {Array(PAD).fill(null).map((_, i) => <div key={`t${i}`} className="sp-item" aria-hidden />)}
         {items.map(item => (
-          <div key={item} className={`sp-item${item === value ? ' sp-selected' : ''}`}>
+          <div
+            key={item}
+            className={`sp-item${item === value ? ' sp-selected' : ''}`}
+            role="option"
+            aria-selected={item === value}
+            onClick={() => onChange(item)}
+          >
             {formatLabel ? formatLabel(item) : item}
           </div>
         ))}

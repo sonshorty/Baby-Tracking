@@ -4,6 +4,7 @@
   height: calc(5 * 44px); /* show 5 items */
   overflow: hidden;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .sp-list {
@@ -36,21 +37,6 @@
   font-size: 26px;
   font-weight: 700;
   color: var(--gray-900);
-}
-
-/* Center highlight band */
-.sp-highlight {
-  position: absolute;
-  top: calc(2 * 44px);
-  left: 0;
-  right: 0;
-  height: 44px;
-  background: var(--pink-100);
-  border-radius: 10px;
-  border-top: 2px solid var(--pink-200);
-  border-bottom: 2px solid var(--pink-200);
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* Fade-out top and bottom items */
