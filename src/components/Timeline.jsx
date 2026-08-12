@@ -41,7 +41,11 @@ function formatDateDisplay(date) {
 export default function Timeline() {
   const records = useRecords();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const dayRecords = getRecordsForDate(records, selectedDate);
+  const [personFilter, setPersonFilter] = useState('all');
+  const allDayRecords = getRecordsForDate(records, selectedDate);
+  const dayRecords = personFilter === 'all'
+    ? allDayRecords
+    : allDayRecords.filter(record => TYPES[record.type]?.who === personFilter);
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const nowSlot = isToday ? slotIndex(new Date()) : -1;
   const nowRef = useRef(null);
@@ -137,6 +141,24 @@ export default function Timeline() {
         >›</button>
       </div>
 
+      <div className="timeline-filter" role="group" aria-label="Lọc timeline theo người">
+        {[
+          { value: 'all', label: 'Cả hai' },
+          { value: 'mom', label: 'Mẹ' },
+          { value: 'baby', label: 'Bé' },
+        ].map(option => (
+          <button
+            key={option.value}
+            type="button"
+            className={`timeline-filter-btn${personFilter === option.value ? ' active' : ''}`}
+            onClick={() => setPersonFilter(option.value)}
+            aria-pressed={personFilter === option.value}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
       <div className="timeline-inner">
         {slots.map(i => {
           const isNow = i === nowSlot;
@@ -190,7 +212,11 @@ export default function Timeline() {
 
         {dayRecords.length === 0 && (
           <div className="timeline-empty">
-            <p>📭 Chưa có ghi chú {isToday ? 'hôm nay' : 'ngày này'}</p>
+            <p>
+              📭 {allDayRecords.length === 0
+                ? `Chưa có ghi chú ${isToday ? 'hôm nay' : 'ngày này'}`
+                : `Không có ghi chú của ${personFilter === 'mom' ? 'mẹ' : 'bé'}`}
+            </p>
             <p>Nhấn <strong>+</strong> bên dưới để bắt đầu</p>
           </div>
         )}
