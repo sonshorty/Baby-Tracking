@@ -292,9 +292,9 @@
 
 /* FAB */
 .timeline-fab {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
+  position: fixed;
+  right: max(16px, calc((100vw - 480px) / 2 + 16px));
+  bottom: calc(var(--nav-height) + 16px);
   width: 52px;
   height: 52px;
   border-radius: 50%;
