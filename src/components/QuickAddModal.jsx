@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { addRecord, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import './QuickAddModal.css';
@@ -28,19 +29,22 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   useEffect(() => {
     const viewport = window.visualViewport;
     const overlay = overlayRef.current;
-    if (!viewport || !overlay) return undefined;
+    if (!overlay) return undefined;
 
     const syncViewport = () => {
-      overlay.style.setProperty('--qam-viewport-height', `${viewport.height}px`);
+      overlay.style.setProperty('--qam-viewport-top', `${viewport?.offsetTop ?? 0}px`);
+      overlay.style.setProperty('--qam-viewport-height', `${viewport?.height ?? window.innerHeight}px`);
     };
 
     syncViewport();
-    viewport.addEventListener('resize', syncViewport);
-    viewport.addEventListener('scroll', syncViewport);
+    viewport?.addEventListener('resize', syncViewport);
+    viewport?.addEventListener('scroll', syncViewport);
+    window.addEventListener('resize', syncViewport);
 
     return () => {
-      viewport.removeEventListener('resize', syncViewport);
-      viewport.removeEventListener('scroll', syncViewport);
+      viewport?.removeEventListener('resize', syncViewport);
+      viewport?.removeEventListener('scroll', syncViewport);
+      window.removeEventListener('resize', syncViewport);
     };
   }, []);
 
@@ -73,73 +77,78 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   const typeList = WHO_TABS.find(x => x.id === who).types;
   const isDiaper = type === 'baby_diaper';
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className="qam-overlay"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <div className="qam-sheet">
-        <div className="qam-handle" />
+        <div className="qam-content">
+          <div className="qam-handle" />
 
-        <div className="qam-header">
-          <span className="qam-title">Thêm ghi chú</span>
-          <button className="qam-close" onClick={onClose} aria-label="Đóng">×</button>
-        </div>
+          <div className="qam-header">
+            <span className="qam-title">Thêm ghi chú</span>
+            <button className="qam-close" onClick={onClose} aria-label="Đóng">×</button>
+          </div>
 
-        {/* Who tabs */}
-        <div className="qam-who-tabs">
-          {WHO_TABS.map(w => (
-            <button key={w.id} className={`qam-who-tab${who === w.id ? ' active' : ''}`} onClick={() => switchWho(w.id)}>
-              <span>{w.emoji}</span><span>{w.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Type pills */}
-        <div className="qam-type-pills">
-          {typeList.map(t => {
-            const info = TYPES[t];
-            return (
-              <button
-                key={t}
-                className={`qam-type-pill${type === t ? ' active' : ''}`}
-                style={type === t ? { background: info.color, borderColor: info.color } : {}}
-                onClick={() => switchType(t)}
-              >
-                <span>{info.emoji}</span>
-                <span>{info.label.replace(/ \(mẹ\)/, '')}</span>
+          {/* Who tabs */}
+          <div className="qam-who-tabs">
+            {WHO_TABS.map(w => (
+              <button key={w.id} className={`qam-who-tab${who === w.id ? ' active' : ''}`} onClick={() => switchWho(w.id)}>
+                <span>{w.emoji}</span><span>{w.label}</span>
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Type pills */}
+          <div className="qam-type-pills">
+            {typeList.map(t => {
+              const info = TYPES[t];
+              return (
+                <button
+                  key={t}
+                  className={`qam-type-pill${type === t ? ' active' : ''}`}
+                  style={type === t ? { background: info.color, borderColor: info.color } : {}}
+                  onClick={() => switchType(t)}
+                >
+                  <span>{info.emoji}</span>
+                  <span>{info.label.replace(/ \(mẹ\)/, '')}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Slider */}
+          {!isDiaper && (
+            <div className="qam-slider">
+              <SliderInput type={type} value={ml} onChange={setMl} />
+            </div>
+          )}
+          {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
+
+          {/* Inline time picker */}
+          <div className="qam-time-row">
+            <span className="qam-time-label">⏰ Thời gian:</span>
+            <div className="qam-time-spin">
+              <button className="qam-spin-btn" onClick={() => changeHour(1)}>▲</button>
+              <span className="qam-spin-val">{pad(hour)}</span>
+              <button className="qam-spin-btn" onClick={() => changeHour(-1)}>▼</button>
+            </div>
+            <span className="qam-colon">:</span>
+            <div className="qam-time-spin">
+              <button className="qam-spin-btn" onClick={() => changeMin(1)}>▲</button>
+              <span className="qam-spin-val">{pad(min)}</span>
+              <button className="qam-spin-btn" onClick={() => changeMin(-1)}>▼</button>
+            </div>
+          </div>
         </div>
 
-        {/* Slider */}
-        {!isDiaper && (
-          <div className="qam-slider">
-            <SliderInput type={type} value={ml} onChange={setMl} />
-          </div>
-        )}
-        {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
-
-        {/* Inline time picker */}
-        <div className="qam-time-row">
-          <span className="qam-time-label">⏰ Thời gian:</span>
-          <div className="qam-time-spin">
-            <button className="qam-spin-btn" onClick={() => changeHour(1)}>▲</button>
-            <span className="qam-spin-val">{pad(hour)}</span>
-            <button className="qam-spin-btn" onClick={() => changeHour(-1)}>▼</button>
-          </div>
-          <span className="qam-colon">:</span>
-          <div className="qam-time-spin">
-            <button className="qam-spin-btn" onClick={() => changeMin(1)}>▲</button>
-            <span className="qam-spin-val">{pad(min)}</span>
-            <button className="qam-spin-btn" onClick={() => changeMin(-1)}>▼</button>
-          </div>
+        <div className="qam-footer">
+          <button className="qam-save-btn" onClick={save}>Lưu lại</button>
         </div>
-
-        <button className="qam-save-btn" onClick={save}>Lưu lại</button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

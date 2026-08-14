@@ -1,11 +1,13 @@
 .qam-overlay {
   position: fixed;
-  inset: 0 0 auto;
+  z-index: 200;
+  top: var(--qam-viewport-top, 0px);
+  right: 0;
+  left: 0;
   height: 100vh;
   height: 100dvh;
   height: var(--qam-viewport-height, 100dvh);
   background: rgba(0,0,0,0.45);
-  z-index: 200;
   display: flex;
   align-items: flex-end;
   animation: qam-fade-in 0.18s ease;
@@ -22,9 +24,17 @@
   margin: 0 auto;
   background: white;
   border-radius: 24px 24px 0 0;
-  padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
   animation: qam-slide-up 0.22s cubic-bezier(0.32,0.72,0,1);
   max-height: calc(100% - 16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.qam-content {
+  min-height: 0;
+  padding: 0 16px;
+  flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -198,6 +208,13 @@
 }
 
 /* Save */
+.qam-footer {
+  flex: 0 0 auto;
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: white;
+  box-shadow: 0 -6px 16px rgba(255,255,255,0.96);
+}
+
 .qam-save-btn {
   background: linear-gradient(135deg, #f9a8d4, #ec4899);
   color: white;
