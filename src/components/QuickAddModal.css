@@ -225,6 +225,9 @@
   width: 100%;
   box-shadow: 0 4px 14px rgba(236,72,153,0.4);
   transition: transform 0.1s;
+  position: sticky;
+  bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 1;
 }
 
 .qam-save-btn:active { transform: scale(0.97); }
