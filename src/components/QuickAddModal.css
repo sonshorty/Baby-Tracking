@@ -1,8 +1,12 @@
 .qam-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
   z-index: 200;
+  top: var(--qam-viewport-top, 0px);
+  right: 0;
+  left: 0;
+  height: 100vh;
+  height: var(--qam-viewport-height, 100vh);
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: flex-end;
   animation: qam-fade-in 0.18s ease;
@@ -19,10 +23,18 @@
   margin: 0 auto;
   background: white;
   border-radius: 24px 24px 0 0;
-  padding: 0 16px 32px;
   animation: qam-slide-up 0.22s cubic-bezier(0.32,0.72,0,1);
+  /* 90vh is retained for older iOS/WebKit versions without reliable dvh. */
+  max-height: 90vh;
   max-height: 90dvh;
+  max-height: min(90dvh, calc(var(--qam-viewport-height, 100vh) - 16px));
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.qam-content {
+  padding: 0 16px;
 }
 
 @keyframes qam-slide-up {
@@ -193,6 +205,15 @@
 }
 
 /* Save */
+.qam-footer {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: white;
+  box-shadow: 0 -6px 16px rgba(255,255,255,0.96);
+}
+
 .qam-save-btn {
   background: linear-gradient(135deg, #f9a8d4, #ec4899);
   color: white;
