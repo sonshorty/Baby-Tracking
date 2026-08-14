@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { addRecord, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import './QuickAddModal.css';
@@ -16,11 +16,33 @@ const DEFAULTS = {
 const pad = n => String(n).padStart(2, '0');
 
 export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
+  const overlayRef = useRef(null);
   const [who, setWho]   = useState('baby');
   const [type, setType] = useState('baby_breast');
   const [ml, setMl]     = useState(100);
   const [hour, setHour] = useState(initHour);
   const [min, setMin]   = useState(initMinute);
+
+  // iOS Chrome and installed PWAs can keep `100vh` behind their bottom UI.
+  // Size the overlay to the actually visible viewport so the CTA stays reachable.
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const overlay = overlayRef.current;
+    if (!viewport || !overlay) return undefined;
+
+    const syncViewport = () => {
+      overlay.style.setProperty('--qam-viewport-height', `${viewport.height}px`);
+    };
+
+    syncViewport();
+    viewport.addEventListener('resize', syncViewport);
+    viewport.addEventListener('scroll', syncViewport);
+
+    return () => {
+      viewport.removeEventListener('resize', syncViewport);
+      viewport.removeEventListener('scroll', syncViewport);
+    };
+  }, []);
 
   function switchWho(w) {
     setWho(w);
@@ -52,7 +74,11 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   const isDiaper = type === 'baby_diaper';
 
   return (
-    <div className="qam-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      ref={overlayRef}
+      className="qam-overlay"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
       <div className="qam-sheet">
         <div className="qam-handle" />
 
