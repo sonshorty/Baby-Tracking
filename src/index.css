@@ -28,7 +28,8 @@
   --radius-sm: 10px;
   --shadow: 0 2px 12px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
-  --nav-height: 72px;
+  /* Keep the navigation controls at their full height above the home indicator. */
+  --nav-height: calc(72px + env(safe-area-inset-bottom, 0px));
   --header-height: 72px;
 }
 
