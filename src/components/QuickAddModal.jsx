@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { addRecord, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
+import TimePicker from './TimePicker';
 import './QuickAddModal.css';
 
 const WHO_TABS = [
@@ -13,8 +14,6 @@ const DEFAULTS = {
   mom_water: 200, mom_milk: 150,
   baby_breast: 100, baby_bottle: 100, baby_diaper: 0,
 };
-
-const pad = n => String(n).padStart(2, '0');
 
 export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   const overlayRef = useRef(null);
@@ -58,13 +57,6 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   function switchType(t) {
     setType(t);
     setMl(DEFAULTS[t]);
-  }
-
-  function changeHour(delta) {
-    setHour(h => (h + delta + 24) % 24);
-  }
-  function changeMin(delta) {
-    setMin(m => (m + delta + 60) % 60);
   }
 
   function save() {
@@ -127,21 +119,13 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
           )}
           {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
 
-          {/* Inline time picker */}
-          <div className="qam-time-row">
-            <span className="qam-time-label">⏰ Thời gian:</span>
-            <div className="qam-time-spin">
-              <button className="qam-spin-btn" onClick={() => changeHour(1)}>▲</button>
-              <span className="qam-spin-val">{pad(hour)}</span>
-              <button className="qam-spin-btn" onClick={() => changeHour(-1)}>▼</button>
-            </div>
-            <span className="qam-colon">:</span>
-            <div className="qam-time-spin">
-              <button className="qam-spin-btn" onClick={() => changeMin(1)}>▲</button>
-              <span className="qam-spin-val">{pad(min)}</span>
-              <button className="qam-spin-btn" onClick={() => changeMin(-1)}>▼</button>
-            </div>
-          </div>
+          {/* Use the same iOS-style scroll picker as the Record screen */}
+          <TimePicker
+            hour={hour}
+            minute={min}
+            onHourChange={setHour}
+            onMinuteChange={setMin}
+          />
         </div>
 
         <div className="qam-footer">
