@@ -82,10 +82,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.diaper-icon { font-size: 64px; line-height: 1; }
+.diaper-title {
+  color: var(--gray-700);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.diaper-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.diaper-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  color: var(--gray-600);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.diaper-option.active {
+  border-color: var(--diaper-option-color);
+  background: color-mix(in srgb, var(--diaper-option-color) 12%, white);
+  color: var(--gray-900);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--diaper-option-color) 25%, transparent);
+}
+
+.diaper-option-icon { font-size: 36px; line-height: 1; }
 .diaper-hint { color: var(--gray-500); font-size: 15px; }
 
 /* Save button */
@@ -105,6 +138,12 @@
 .save-btn:active {
   transform: scale(0.97);
   box-shadow: 0 2px 8px rgba(236,72,153,0.3);
+}
+
+.save-btn:disabled {
+  background: var(--gray-300);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 /* Toast */
