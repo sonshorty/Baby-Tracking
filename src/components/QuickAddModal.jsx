@@ -7,7 +7,7 @@ import './QuickAddModal.css';
 
 const WHO_TABS = [
   { id: 'mom',  label: 'Mẹ', emoji: '👩', types: ['mom_water', 'mom_milk'] },
-  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', 'baby_diaper'] },
+  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', ...DIAPER_TYPES] },
 ];
 
 const DEFAULTS = {

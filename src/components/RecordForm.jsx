@@ -10,7 +10,7 @@ const WHO_TABS = [
 ];
 
 const MOM_TYPES = ['mom_water', 'mom_milk'];
-const BABY_TYPES = ['baby_breast', 'baby_bottle', 'baby_diaper'];
+const BABY_TYPES = ['baby_breast', 'baby_bottle', ...DIAPER_TYPES];
 
 function Toast({ msg, onDone }) {
   useState(() => {
