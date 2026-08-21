@@ -179,4 +179,8 @@ export const TYPES = {
   baby_breast: { label: 'Bú mẹ',       emoji: '🤱', color: '#f472b6', unit: 'ml', who: 'baby' },
   baby_bottle: { label: 'Bú bình',     emoji: '🍼', color: '#fb923c', unit: 'ml', who: 'baby' },
   baby_diaper: { label: 'Thay bỉm',    emoji: '🩲', color: '#4ade80', unit: null,  who: 'baby' },
+  baby_diaper_wet:   { label: 'Bỉm ướt',  emoji: '💦', color: '#38bdf8', unit: null, who: 'baby' },
+  baby_diaper_dirty: { label: 'Bỉm bẩn', emoji: '💩', color: '#a16207', unit: null, who: 'baby' },
 };
+
+export const DIAPER_TYPES = ['baby_diaper', 'baby_diaper_wet', 'baby_diaper_dirty'];

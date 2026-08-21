@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addRecord, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_TYPES, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './RecordForm.css';
@@ -10,7 +10,7 @@ const WHO_TABS = [
 ];
 
 const MOM_TYPES = ['mom_water', 'mom_milk'];
-const BABY_TYPES = ['baby_breast', 'baby_bottle', 'baby_diaper'];
+const BABY_TYPES = ['baby_breast', 'baby_bottle', ...DIAPER_TYPES];
 
 function Toast({ msg, onDone }) {
   useState(() => {
@@ -39,7 +39,7 @@ export default function RecordForm() {
 
   function switchType(t) {
     setType(t);
-    if (t === 'baby_diaper') setMl(0);
+    if (DIAPER_TYPES.includes(t)) setMl(0);
     else if (t === 'mom_water') setMl(200);
     else if (t === 'mom_milk') setMl(150);
     else setMl(100);
@@ -52,16 +52,16 @@ export default function RecordForm() {
     // Build timestamp from today's date + picked hour/minute
     const ts = new Date();
     ts.setHours(hour, minute, 0, 0);
-    addRecord({ type, value: type === 'baby_diaper' ? null : ml, timestamp: ts.toISOString() });
-    const label = type === 'baby_diaper'
-      ? `✅ Đã ghi thay bỉm`
+    addRecord({ type, value: DIAPER_TYPES.includes(type) ? null : ml, timestamp: ts.toISOString() });
+    const label = DIAPER_TYPES.includes(type)
+      ? `✅ Đã ghi ${info.label.toLowerCase()}`
       : `✅ Đã ghi ${info.label} – ${ml} ml`;
     setToast(label);
     setSaving(false);
   }
 
   const typeList = who === 'mom' ? MOM_TYPES : BABY_TYPES;
-  const isDiaper = type === 'baby_diaper';
+  const isDiaper = DIAPER_TYPES.includes(type);
 
   return (
     <div className="record-form">
@@ -103,8 +103,8 @@ export default function RecordForm() {
       <div className="form-card">
         {isDiaper ? (
           <div className="diaper-section">
-            <div className="diaper-icon">🩲</div>
-            <p className="diaper-hint">Nhấn <strong>Lưu</strong> để ghi nhận thời điểm thay bỉm</p>
+            <div className="diaper-icon">{TYPES[type].emoji}</div>
+            <p className="diaper-hint">Nhấn <strong>Lưu</strong> để ghi nhận {TYPES[type].label.toLowerCase()}</p>
           </div>
         ) : (
           <SliderInput type={type} value={ml} onChange={setMl} />
