@@ -193,8 +193,8 @@ export default function Dashboard() {
       <div className="dash-section">
         <p className="section-title">Bé hôm nay</p>
         <div className="stat-row">
-          <StatCard emoji="🤱" label="Bú mẹ"   value={babyBreast} unit="ml" color="#f472b6" />
-          <StatCard emoji="🍼" label="Bú bình"  value={babyBottle} unit="ml" color="#fb923c" />
+          <StatCard emoji="🤱" label="Sữa mẹ"       value={babyBreast} unit="ml" color="#f472b6" />
+          <StatCard emoji="🍼" label="Sữa công thức" value={babyBottle} unit="ml" color="#fb923c" />
           <StatCard emoji="🩲" label="Thay bỉm" value={diaperCount} unit="lần" color="#4ade80" />
         </div>
         <div className="dash-card">
