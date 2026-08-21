@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addRecord, DIAPER_OPTIONS, DIAPER_TYPES, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_OPTIONS, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './RecordForm.css';
@@ -10,7 +10,7 @@ const WHO_TABS = [
 ];
 
 const MOM_TYPES = ['mom_water', 'mom_milk'];
-const BABY_TYPES = ['baby_breast', 'baby_bottle', ...DIAPER_TYPES];
+const BABY_TYPES = ['baby_breast', 'baby_bottle', 'baby_diaper'];
 
 function Toast({ msg, onDone }) {
   useState(() => {
@@ -41,29 +41,35 @@ export default function RecordForm() {
 
   function switchType(t) {
     setType(t);
-    if (DIAPER_TYPES.includes(t)) setMl(0);
+    if (t === 'baby_diaper') setMl(0);
     else if (t === 'mom_water') setMl(200);
     else if (t === 'mom_milk') setMl(150);
     else setMl(100);
   }
 
   function save() {
-    if (saving || type === 'baby_diaper') return;
+    if (saving || (type === 'baby_diaper' && !diaperStatus)) return;
     setSaving(true);
     const info = TYPES[type];
     // Build timestamp from today's date + picked hour/minute
     const ts = new Date();
     ts.setHours(hour, minute, 0, 0);
-    addRecord({ type, value: DIAPER_TYPES.includes(type) ? null : ml, timestamp: ts.toISOString() });
-    const label = DIAPER_TYPES.includes(type)
-      ? `✅ Đã ghi ${info.label.toLowerCase()}`
+    addRecord({
+      type,
+      value: type === 'baby_diaper' ? null : ml,
+      diaperStatus: type === 'baby_diaper' ? diaperStatus : undefined,
+      timestamp: ts.toISOString(),
+    });
+    const diaperOption = DIAPER_OPTIONS.find(option => option.id === diaperStatus);
+    const label = type === 'baby_diaper'
+      ? `✅ Đã ghi ${diaperOption.label.toLowerCase()}`
       : `✅ Đã ghi ${info.label} – ${ml} ml`;
     setToast(label);
     setSaving(false);
   }
 
   const typeList = who === 'mom' ? MOM_TYPES : BABY_TYPES;
-  const isDiaper = DIAPER_TYPES.includes(type);
+  const isDiaper = type === 'baby_diaper';
 
   return (
     <div className="record-form">
@@ -87,7 +93,7 @@ export default function RecordForm() {
       <div className="type-pills">
         {typeList.map(t => {
           const info = TYPES[t];
-          const isActive = t === 'baby_diaper' ? isDiaper : type === t;
+          const isActive = type === t;
           return (
             <button
               key={t}
@@ -109,26 +115,25 @@ export default function RecordForm() {
             <p className="diaper-title">Tình trạng bỉm</p>
             <div className="diaper-options" role="group" aria-label="Chọn tình trạng bỉm">
               {DIAPER_OPTIONS.map(option => {
-                const info = TYPES[option];
                 return (
                   <button
-                    key={option}
+                    key={option.id}
                     type="button"
-                    className={`diaper-option${type === option ? ' active' : ''}`}
-                    style={type === option ? { '--diaper-option-color': info.color } : {}}
-                    onClick={() => switchType(option)}
-                    aria-pressed={type === option}
+                    className={`diaper-option${diaperStatus === option.id ? ' active' : ''}`}
+                    style={diaperStatus === option.id ? { '--diaper-option-color': option.color } : {}}
+                    onClick={() => setDiaperStatus(option.id)}
+                    aria-pressed={diaperStatus === option.id}
                   >
-                    <span className="diaper-option-icon">{info.emoji}</span>
-                    <span>{info.label}</span>
+                    <span className="diaper-option-icon">{option.emoji}</span>
+                    <span>{option.label}</span>
                   </button>
                 );
               })}
             </div>
             <p className="diaper-hint">
-              {type === 'baby_diaper'
+              {!diaperStatus
                 ? 'Chọn tình trạng bỉm trước khi lưu'
-                : `Đã chọn ${TYPES[type].label.toLowerCase()}`}
+                : `Đã chọn ${DIAPER_OPTIONS.find(option => option.id === diaperStatus).label.toLowerCase()}`}
             </p>
           </div>
         ) : (
@@ -142,7 +147,7 @@ export default function RecordForm() {
         onHourChange={setHour} onMinuteChange={setMinute}
       />
 
-      <button className="save-btn" onClick={save} disabled={type === 'baby_diaper'}>
+      <button className="save-btn" onClick={save} disabled={isDiaper && !diaperStatus}>
         Lưu lại
       </button>
     </div>
