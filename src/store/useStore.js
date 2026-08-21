@@ -180,8 +180,8 @@ export function getLastNDays(records, n = 7) {
 export const TYPES = {
   mom_water:   { label: 'Nước (mẹ)',   emoji: '💧', color: '#60a5fa', unit: 'ml', who: 'mom' },
   mom_milk:    { label: 'Sữa (mẹ)',    emoji: '🥛', color: '#a78bfa', unit: 'ml', who: 'mom' },
-  baby_breast: { label: 'Bú mẹ',       emoji: '🤱', color: '#f472b6', unit: 'ml', who: 'baby' },
-  baby_bottle: { label: 'Bú bình',     emoji: '🍼', color: '#fb923c', unit: 'ml', who: 'baby' },
+  baby_breast: { label: 'Sữa mẹ',       emoji: '🤱', color: '#f472b6', unit: 'ml', who: 'baby' },
+  baby_bottle: { label: 'Sữa công thức', emoji: '🍼', color: '#fb923c', unit: 'ml', who: 'baby' },
   baby_diaper: { label: 'Thay bỉm',    emoji: '🩲', color: '#4ade80', unit: null,  who: 'baby' },
 };
 
