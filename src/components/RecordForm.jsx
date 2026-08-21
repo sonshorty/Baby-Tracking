@@ -24,6 +24,7 @@ export default function RecordForm() {
   const [who, setWho] = useState('mom');
   const [type, setType] = useState('mom_water');
   const [ml, setMl] = useState(200);
+  const [diaperStatus, setDiaperStatus] = useState(null);
   const [toast, setToast] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -34,6 +35,7 @@ export default function RecordForm() {
   function switchWho(w) {
     setWho(w);
     setType(w === 'mom' ? 'mom_water' : 'baby_breast');
+    setDiaperStatus(null);
     setMl(w === 'mom' ? 200 : 100);
   }
 

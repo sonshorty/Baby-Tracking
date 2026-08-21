@@ -21,6 +21,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   const [who, setWho]   = useState('baby');
   const [type, setType] = useState('baby_breast');
   const [ml, setMl]     = useState(100);
+  const [diaperStatus, setDiaperStatus] = useState(null);
   const [hour, setHour] = useState(initHour);
   const [min, setMin]   = useState(initMinute);
 
@@ -52,11 +53,13 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
     setWho(w);
     const t = WHO_TABS.find(x => x.id === w).types[0];
     setType(t);
+    setDiaperStatus(null);
     setMl(DEFAULTS[t]);
   }
 
   function switchType(t) {
     setType(t);
+    setDiaperStatus(null);
     setMl(DEFAULTS[t]);
   }
 

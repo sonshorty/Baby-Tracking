@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRecords, getTodayRecords, deleteRecord, TYPES } from '../store/useStore';
+import { useRecords, getTodayRecords, deleteRecord, DIAPER_OPTIONS, TYPES } from '../store/useStore';
 import QuickAddModal from './QuickAddModal';
 import './Timeline.css';
 
@@ -20,6 +20,12 @@ function slotLabel(idx) {
 
 function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function getRecordInfo(record) {
+  if (record.type !== 'baby_diaper' || !record.diaperStatus) return TYPES[record.type];
+  const diaperOption = DIAPER_OPTIONS.find(option => option.id === record.diaperStatus);
+  return diaperOption ? { ...TYPES.baby_diaper, ...diaperOption } : TYPES.baby_diaper;
 }
 
 function getRecordsForDate(records, date) {
@@ -184,7 +190,7 @@ export default function Timeline() {
                   <div className="slot-now-badge">Bây giờ</div>
                 )}
                 {hasItems && items.map(r => {
-                  const info = TYPES[r.type];
+                  const info = getRecordInfo(r);
                   return (
                     <div key={r.id} className="event-chip" style={{ '--chip-color': info.color }}>
                       <span className="event-emoji">{info.emoji}</span>

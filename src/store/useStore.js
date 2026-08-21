@@ -99,8 +99,10 @@ function requireActivePath() {
   return _activePath;
 }
 
-export function addRecord({ type, value, note = '', timestamp = new Date().toISOString() }) {
-  push(ref(db, requireActivePath()), { type, value: value ?? null, note, timestamp });
+export function addRecord({ type, value, note = '', diaperStatus, timestamp = new Date().toISOString() }) {
+  const record = { type, value: value ?? null, note, timestamp };
+  if (diaperStatus) record.diaperStatus = diaperStatus;
+  push(ref(db, requireActivePath()), record);
 }
 
 export function deleteRecord(id) {
@@ -128,7 +130,9 @@ export function importData(jsonText) {
   incoming.forEach(r => {
     if (!r.type || !r.timestamp) return;
     if (existingTs.has(r.timestamp + r.type)) return;
-    push(dbRef, { type: r.type, value: r.value ?? null, note: r.note ?? '', timestamp: r.timestamp });
+    const record = { type: r.type, value: r.value ?? null, note: r.note ?? '', timestamp: r.timestamp };
+    if (r.diaperStatus) record.diaperStatus = r.diaperStatus;
+    push(dbRef, record);
     imported++;
   });
   return { imported, skipped: incoming.length - imported };
