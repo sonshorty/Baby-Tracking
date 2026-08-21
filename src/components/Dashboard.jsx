@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useRecords, getTodayRecords, exportData, importData } from '../store/useStore';
+import { useRecords, getTodayRecords, DIAPER_TYPES, exportData, importData } from '../store/useStore';
 import './Dashboard.css';
 
 function sum(records, ...types) {
@@ -119,7 +119,7 @@ export default function Dashboard() {
   const momMilk = sum(today, 'mom_milk');
   const babyBreast = sum(today, 'baby_breast');
   const babyBottle = sum(today, 'baby_bottle');
-  const diaperCount = count(today, 'baby_diaper');
+  const diaperCount = count(today, ...DIAPER_TYPES);
 
   const momMax = Math.max(momWater + momMilk, 1);
   const babyMax = Math.max(babyBreast + babyBottle, 1);

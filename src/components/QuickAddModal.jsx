@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { addRecord, DIAPER_OPTIONS, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_OPTIONS, DIAPER_TYPES, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './QuickAddModal.css';
 
 const WHO_TABS = [
   { id: 'mom',  label: 'Mẹ', emoji: '👩', types: ['mom_water', 'mom_milk'] },
-  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', 'baby_diaper'] },
+  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', ...DIAPER_TYPES] },
 ];
 
 const DEFAULTS = {
   mom_water: 200, mom_milk: 150,
-  baby_breast: 100, baby_bottle: 100, baby_diaper: 0,
+  baby_breast: 100, baby_bottle: 100,
+  baby_diaper: 0, baby_diaper_wet: 0, baby_diaper_dirty: 0,
 };
 
 export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
@@ -63,20 +64,15 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   }
 
   function save() {
-    if (type === 'baby_diaper' && !diaperStatus) return;
+    if (type === 'baby_diaper') return;
     const ts = new Date(date);
     ts.setHours(hour, min, 0, 0);
-    addRecord({
-      type,
-      value: type === 'baby_diaper' ? null : ml,
-      diaperStatus: type === 'baby_diaper' ? diaperStatus : undefined,
-      timestamp: ts.toISOString(),
-    });
+    addRecord({ type, value: DIAPER_TYPES.includes(type) ? null : ml, timestamp: ts.toISOString() });
     onClose();
   }
 
   const typeList = WHO_TABS.find(x => x.id === who).types;
-  const isDiaper = type === 'baby_diaper';
+  const isDiaper = DIAPER_TYPES.includes(type);
 
   return createPortal(
     <div
@@ -106,7 +102,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
           <div className="qam-type-pills">
             {typeList.map(t => {
               const info = TYPES[t];
-              const isActive = type === t;
+              const isActive = t === 'baby_diaper' ? isDiaper : type === t;
               return (
                 <button
                   key={t}
@@ -131,24 +127,25 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
             <div className="qam-diaper-group">
               <p className="qam-diaper-title">Tình trạng bỉm</p>
               <div className="qam-diaper-options" role="group" aria-label="Chọn tình trạng bỉm">
-                {DIAPER_OPTIONS.map(option => (
+                {DIAPER_OPTIONS.map(option => {
+                  const info = TYPES[option];
+                  return (
                     <button
-                      key={option.id}
+                      key={option}
                       type="button"
-                      className={`qam-diaper-option${diaperStatus === option.id ? ' active' : ''}`}
-                      style={diaperStatus === option.id ? { '--diaper-option-color': option.color } : {}}
-                      onClick={() => setDiaperStatus(option.id)}
-                      aria-pressed={diaperStatus === option.id}
+                      className={`qam-diaper-option${type === option ? ' active' : ''}`}
+                      style={type === option ? { '--diaper-option-color': info.color } : {}}
+                      onClick={() => switchType(option)}
+                      aria-pressed={type === option}
                     >
-                      <span>{option.emoji}</span>
-                      <span>{option.label}</span>
+                      <span>{info.emoji}</span>
+                      <span>{info.label}</span>
                     </button>
-                ))}
+                  );
+                })}
               </div>
               <p className="qam-diaper-hint">
-                {!diaperStatus
-                  ? 'Chọn tình trạng bỉm trước khi lưu'
-                  : `Đã chọn ${DIAPER_OPTIONS.find(option => option.id === diaperStatus).label.toLowerCase()}`}
+                {type === 'baby_diaper' ? 'Chọn tình trạng bỉm trước khi lưu' : `Đã chọn ${TYPES[type].label.toLowerCase()}`}
               </p>
             </div>
           )}
@@ -163,7 +160,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
         </div>
 
         <div className="qam-footer">
-          <button className="qam-save-btn" onClick={save} disabled={isDiaper && !diaperStatus}>Lưu lại</button>
+          <button className="qam-save-btn" onClick={save} disabled={type === 'baby_diaper'}>Lưu lại</button>
         </div>
       </div>
     </div>,
