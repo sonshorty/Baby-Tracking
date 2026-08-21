@@ -183,4 +183,5 @@ export const TYPES = {
   baby_diaper_dirty: { label: 'Bỉm bẩn', emoji: '💩', color: '#a16207', unit: null, who: 'baby' },
 };
 
-export const DIAPER_TYPES = ['baby_diaper', 'baby_diaper_wet', 'baby_diaper_dirty'];
+export const DIAPER_OPTIONS = ['baby_diaper_wet', 'baby_diaper_dirty'];
+export const DIAPER_TYPES = ['baby_diaper', ...DIAPER_OPTIONS];

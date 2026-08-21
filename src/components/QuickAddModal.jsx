@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { addRecord, DIAPER_TYPES, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_OPTIONS, DIAPER_TYPES, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './QuickAddModal.css';
@@ -61,6 +61,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   }
 
   function save() {
+    if (type === 'baby_diaper') return;
     const ts = new Date(date);
     ts.setHours(hour, min, 0, 0);
     addRecord({ type, value: DIAPER_TYPES.includes(type) ? null : ml, timestamp: ts.toISOString() });
@@ -98,11 +99,12 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
           <div className="qam-type-pills">
             {typeList.map(t => {
               const info = TYPES[t];
+              const isActive = t === 'baby_diaper' ? isDiaper : type === t;
               return (
                 <button
                   key={t}
-                  className={`qam-type-pill${type === t ? ' active' : ''}`}
-                  style={type === t ? { background: info.color, borderColor: info.color } : {}}
+                  className={`qam-type-pill${isActive ? ' active' : ''}`}
+                  style={isActive ? { background: info.color, borderColor: info.color } : {}}
                   onClick={() => switchType(t)}
                 >
                   <span>{info.emoji}</span>
@@ -119,8 +121,29 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
             </div>
           )}
           {isDiaper && (
-            <div className="qam-diaper-hint">
-              Ghi nhận {TYPES[type].label.toLowerCase()} {TYPES[type].emoji}
+            <div className="qam-diaper-group">
+              <p className="qam-diaper-title">Tình trạng bỉm</p>
+              <div className="qam-diaper-options" role="group" aria-label="Chọn tình trạng bỉm">
+                {DIAPER_OPTIONS.map(option => {
+                  const info = TYPES[option];
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`qam-diaper-option${type === option ? ' active' : ''}`}
+                      style={type === option ? { '--diaper-option-color': info.color } : {}}
+                      onClick={() => switchType(option)}
+                      aria-pressed={type === option}
+                    >
+                      <span>{info.emoji}</span>
+                      <span>{info.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="qam-diaper-hint">
+                {type === 'baby_diaper' ? 'Chọn tình trạng bỉm trước khi lưu' : `Đã chọn ${TYPES[type].label.toLowerCase()}`}
+              </p>
             </div>
           )}
 
@@ -134,7 +157,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
         </div>
 
         <div className="qam-footer">
-          <button className="qam-save-btn" onClick={save}>Lưu lại</button>
+          <button className="qam-save-btn" onClick={save} disabled={type === 'baby_diaper'}>Lưu lại</button>
         </div>
       </div>
     </div>,

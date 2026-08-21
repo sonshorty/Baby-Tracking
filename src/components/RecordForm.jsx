@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addRecord, DIAPER_TYPES, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_OPTIONS, DIAPER_TYPES, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './RecordForm.css';
@@ -46,7 +46,7 @@ export default function RecordForm() {
   }
 
   function save() {
-    if (saving) return;
+    if (saving || type === 'baby_diaper') return;
     setSaving(true);
     const info = TYPES[type];
     // Build timestamp from today's date + picked hour/minute
@@ -85,11 +85,12 @@ export default function RecordForm() {
       <div className="type-pills">
         {typeList.map(t => {
           const info = TYPES[t];
+          const isActive = t === 'baby_diaper' ? isDiaper : type === t;
           return (
             <button
               key={t}
-              className={`type-pill${type === t ? ' active' : ''}`}
-              style={type === t ? { background: info.color, borderColor: info.color } : {}}
+              className={`type-pill${isActive ? ' active' : ''}`}
+              style={isActive ? { background: info.color, borderColor: info.color } : {}}
               onClick={() => switchType(t)}
             >
               <span>{info.emoji}</span>
@@ -103,8 +104,30 @@ export default function RecordForm() {
       <div className="form-card">
         {isDiaper ? (
           <div className="diaper-section">
-            <div className="diaper-icon">{TYPES[type].emoji}</div>
-            <p className="diaper-hint">Nhấn <strong>Lưu</strong> để ghi nhận {TYPES[type].label.toLowerCase()}</p>
+            <p className="diaper-title">Tình trạng bỉm</p>
+            <div className="diaper-options" role="group" aria-label="Chọn tình trạng bỉm">
+              {DIAPER_OPTIONS.map(option => {
+                const info = TYPES[option];
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`diaper-option${type === option ? ' active' : ''}`}
+                    style={type === option ? { '--diaper-option-color': info.color } : {}}
+                    onClick={() => switchType(option)}
+                    aria-pressed={type === option}
+                  >
+                    <span className="diaper-option-icon">{info.emoji}</span>
+                    <span>{info.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="diaper-hint">
+              {type === 'baby_diaper'
+                ? 'Chọn tình trạng bỉm trước khi lưu'
+                : `Đã chọn ${TYPES[type].label.toLowerCase()}`}
+            </p>
           </div>
         ) : (
           <SliderInput type={type} value={ml} onChange={setMl} />
@@ -117,7 +140,7 @@ export default function RecordForm() {
         onHourChange={setHour} onMinuteChange={setMinute}
       />
 
-      <button className="save-btn" onClick={save}>
+      <button className="save-btn" onClick={save} disabled={type === 'baby_diaper'}>
         Lưu lại
       </button>
     </div>
