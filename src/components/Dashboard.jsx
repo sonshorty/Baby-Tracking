@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useRecords, getTodayRecords, getLastNDays, TYPES, exportData, importData } from '../store/useStore';
+import { useRecords, getTodayRecords, exportData, importData } from '../store/useStore';
 import './Dashboard.css';
 
 function sum(records, ...types) {

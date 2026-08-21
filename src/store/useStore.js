@@ -99,8 +99,10 @@ function requireActivePath() {
   return _activePath;
 }
 
-export function addRecord({ type, value, note = '', timestamp = new Date().toISOString() }) {
-  push(ref(db, requireActivePath()), { type, value: value ?? null, note, timestamp });
+export function addRecord({ type, value, note = '', diaperStatus, timestamp = new Date().toISOString() }) {
+  const record = { type, value: value ?? null, note, timestamp };
+  if (diaperStatus) record.diaperStatus = diaperStatus;
+  push(ref(db, requireActivePath()), record);
 }
 
 export function deleteRecord(id) {
@@ -128,7 +130,9 @@ export function importData(jsonText) {
   incoming.forEach(r => {
     if (!r.type || !r.timestamp) return;
     if (existingTs.has(r.timestamp + r.type)) return;
-    push(dbRef, { type: r.type, value: r.value ?? null, note: r.note ?? '', timestamp: r.timestamp });
+    const record = { type: r.type, value: r.value ?? null, note: r.note ?? '', timestamp: r.timestamp };
+    if (r.diaperStatus) record.diaperStatus = r.diaperStatus;
+    push(dbRef, record);
     imported++;
   });
   return { imported, skipped: incoming.length - imported };
@@ -180,3 +184,8 @@ export const TYPES = {
   baby_bottle: { label: 'Bú bình',     emoji: '🍼', color: '#fb923c', unit: 'ml', who: 'baby' },
   baby_diaper: { label: 'Thay bỉm',    emoji: '🩲', color: '#4ade80', unit: null,  who: 'baby' },
 };
+
+export const DIAPER_OPTIONS = [
+  { id: 'wet', label: 'Bỉm ướt', emoji: '💦', color: '#38bdf8' },
+  { id: 'dirty', label: 'Bỉm bẩn', emoji: '💩', color: '#a16207' },
+];

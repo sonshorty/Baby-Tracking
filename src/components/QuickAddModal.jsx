@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { addRecord, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_OPTIONS, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './QuickAddModal.css';
@@ -20,6 +20,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   const [who, setWho]   = useState('baby');
   const [type, setType] = useState('baby_breast');
   const [ml, setMl]     = useState(100);
+  const [diaperStatus, setDiaperStatus] = useState(null);
   const [hour, setHour] = useState(initHour);
   const [min, setMin]   = useState(initMinute);
 
@@ -51,18 +52,26 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
     setWho(w);
     const t = WHO_TABS.find(x => x.id === w).types[0];
     setType(t);
+    setDiaperStatus(null);
     setMl(DEFAULTS[t]);
   }
 
   function switchType(t) {
     setType(t);
+    setDiaperStatus(null);
     setMl(DEFAULTS[t]);
   }
 
   function save() {
+    if (type === 'baby_diaper' && !diaperStatus) return;
     const ts = new Date(date);
     ts.setHours(hour, min, 0, 0);
-    addRecord({ type, value: type === 'baby_diaper' ? null : ml, timestamp: ts.toISOString() });
+    addRecord({
+      type,
+      value: type === 'baby_diaper' ? null : ml,
+      diaperStatus: type === 'baby_diaper' ? diaperStatus : undefined,
+      timestamp: ts.toISOString(),
+    });
     onClose();
   }
 
@@ -97,11 +106,12 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
           <div className="qam-type-pills">
             {typeList.map(t => {
               const info = TYPES[t];
+              const isActive = type === t;
               return (
                 <button
                   key={t}
-                  className={`qam-type-pill${type === t ? ' active' : ''}`}
-                  style={type === t ? { background: info.color, borderColor: info.color } : {}}
+                  className={`qam-type-pill${isActive ? ' active' : ''}`}
+                  style={isActive ? { background: info.color, borderColor: info.color } : {}}
                   onClick={() => switchType(t)}
                 >
                   <span>{info.emoji}</span>
@@ -117,7 +127,31 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
               <SliderInput type={type} value={ml} onChange={setMl} />
             </div>
           )}
-          {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
+          {isDiaper && (
+            <div className="qam-diaper-group">
+              <p className="qam-diaper-title">Tình trạng bỉm</p>
+              <div className="qam-diaper-options" role="group" aria-label="Chọn tình trạng bỉm">
+                {DIAPER_OPTIONS.map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`qam-diaper-option${diaperStatus === option.id ? ' active' : ''}`}
+                      style={diaperStatus === option.id ? { '--diaper-option-color': option.color } : {}}
+                      onClick={() => setDiaperStatus(option.id)}
+                      aria-pressed={diaperStatus === option.id}
+                    >
+                      <span>{option.emoji}</span>
+                      <span>{option.label}</span>
+                    </button>
+                ))}
+              </div>
+              <p className="qam-diaper-hint">
+                {!diaperStatus
+                  ? 'Chọn tình trạng bỉm trước khi lưu'
+                  : `Đã chọn ${DIAPER_OPTIONS.find(option => option.id === diaperStatus).label.toLowerCase()}`}
+              </p>
+            </div>
+          )}
 
           {/* Use the same iOS-style scroll picker as the Record screen */}
           <TimePicker
@@ -129,7 +163,7 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
         </div>
 
         <div className="qam-footer">
-          <button className="qam-save-btn" onClick={save}>Lưu lại</button>
+          <button className="qam-save-btn" onClick={save} disabled={isDiaper && !diaperStatus}>Lưu lại</button>
         </div>
       </div>
     </div>,

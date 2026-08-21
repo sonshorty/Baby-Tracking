@@ -143,11 +143,50 @@
 /* Slider area */
 .qam-slider { margin-bottom: 4px; }
 
+.qam-diaper-group {
+  padding: 4px 0 8px;
+}
+
+.qam-diaper-title {
+  text-align: center;
+  color: var(--gray-700);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.qam-diaper-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.qam-diaper-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  color: var(--gray-600);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.qam-diaper-option.active {
+  border-color: var(--diaper-option-color);
+  background: color-mix(in srgb, var(--diaper-option-color) 12%, white);
+  color: var(--gray-900);
+}
+
+.qam-diaper-option span:first-child { font-size: 22px; }
+
 .qam-diaper-hint {
   text-align: center;
   color: var(--gray-500);
-  font-size: 14px;
-  padding: 16px 0 8px;
+  font-size: 13px;
+  padding-top: 8px;
 }
 
 /* Inline time picker */
@@ -233,3 +272,9 @@
 }
 
 .qam-save-btn:active { transform: scale(0.97); }
+
+.qam-save-btn:disabled {
+  background: var(--gray-300);
+  box-shadow: none;
+  cursor: not-allowed;
+}
