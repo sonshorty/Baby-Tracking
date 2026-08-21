@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { addRecord, TYPES } from '../store/useStore';
+import { addRecord, DIAPER_TYPES, TYPES } from '../store/useStore';
 import SliderInput from './SliderInput';
 import TimePicker from './TimePicker';
 import './QuickAddModal.css';
 
 const WHO_TABS = [
   { id: 'mom',  label: 'Mẹ', emoji: '👩', types: ['mom_water', 'mom_milk'] },
-  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', 'baby_diaper'] },
+  { id: 'baby', label: 'Bé', emoji: '👶', types: ['baby_breast', 'baby_bottle', ...DIAPER_TYPES] },
 ];
 
 const DEFAULTS = {
   mom_water: 200, mom_milk: 150,
-  baby_breast: 100, baby_bottle: 100, baby_diaper: 0,
+  baby_breast: 100, baby_bottle: 100,
+  baby_diaper: 0, baby_diaper_wet: 0, baby_diaper_dirty: 0,
 };
 
 export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
@@ -62,12 +63,12 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
   function save() {
     const ts = new Date(date);
     ts.setHours(hour, min, 0, 0);
-    addRecord({ type, value: type === 'baby_diaper' ? null : ml, timestamp: ts.toISOString() });
+    addRecord({ type, value: DIAPER_TYPES.includes(type) ? null : ml, timestamp: ts.toISOString() });
     onClose();
   }
 
   const typeList = WHO_TABS.find(x => x.id === who).types;
-  const isDiaper = type === 'baby_diaper';
+  const isDiaper = DIAPER_TYPES.includes(type);
 
   return createPortal(
     <div
@@ -117,7 +118,11 @@ export default function QuickAddModal({ date, initHour, initMinute, onClose }) {
               <SliderInput type={type} value={ml} onChange={setMl} />
             </div>
           )}
-          {isDiaper && <div className="qam-diaper-hint">Ghi nhận thời điểm thay bỉm 🩲</div>}
+          {isDiaper && (
+            <div className="qam-diaper-hint">
+              Ghi nhận {TYPES[type].label.toLowerCase()} {TYPES[type].emoji}
+            </div>
+          )}
 
           {/* Use the same iOS-style scroll picker as the Record screen */}
           <TimePicker
